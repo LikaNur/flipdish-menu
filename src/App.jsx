@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { displayPrice } from './displayPrice';
 
 function App() {
   const [menu, setMenu] = useState([]);
@@ -69,7 +70,7 @@ function App() {
       <h1 className='text-4xl font-bold text-center mt-6 text-[#0B75D7]'>
         MENU
       </h1>
-      <main className='my-4 flex flex-col gap-6'>
+      <main className='my-4 flex flex-col gap-6 mb-12'>
         {menu
           .filter(menuSection => !/test/i.test(menuSection.Name))
           .map(menuSection => {
@@ -110,8 +111,8 @@ function App() {
                           {menuItem?.ImageUrl && (
                             <div className='shrink-0 lg:w-[450px] h-[250px] overflow-hidden rounded-2xl'>
                               <img
-                                src={menuItem.ImageUrl || 'Menu Item'}
-                                alt={menuItem?.Name}
+                                src={menuItem.ImageUrl}
+                                alt={menuItem?.Name || 'Menu Item'}
                                 draggable='false'
                                 className='h-full w-full object-cover rounded-2xl transition-transform duration-400 hover:scale-110'
                                 loading='lazy'
@@ -131,26 +132,17 @@ function App() {
                             )}
                           </div>
                           <div className='flex justify-between mt-auto text-start'>
-                            {menuItem?.Price > 0 ? (
-                              <p className='text-xl font-medium'>
-                                £{menuItem?.Price.toFixed(2)}
-                              </p>
-                            ) : (
-                              menuItem.MenuItemOptionSets.map(options => (
-                                <p
-                                  key={options.MenuItemOptionSetId}
-                                  className='text-xl font-medium'
-                                >
-                                  from £{options?.MinPrice.toFixed(2)}
-                                </p>
-                              ))
-                            )}
+                            <p className='text-xl font-medium text-[#b43d15]'>
+                              {displayPrice(menuItem)}
+                            </p>
                             <button
+                              key={menuItem?.MenuItemId}
                               onClick={handleModalOpen}
                               className='pointer text-white rounded-3xl bg-[#1879D8] hover:bg-[#2574bd] px-4 py-2 cursor-pointer'
                             >
                               Customize &gt;
                             </button>
+
                             {isModalOpen && (
                               <div className='modal-container fixed inset-0 w-full h-full flex justify-center items-center px-4  bg-black/20'>
                                 <div
@@ -176,7 +168,27 @@ function App() {
                                     </button>
                                   </div>
 
-                                  <section className='modal-content'></section>
+                                  <section className='modal-content'>
+                                    {menuItem =>
+                                      menuItem.MenuItemOptionSets.map(
+                                        menuOption =>
+                                          menuOption.MenuItemOptionSetItems.map(
+                                            menuOptionItem => {
+                                              return (
+                                                <div>
+                                                  <p>{menuOptionItem?.Name}</p>
+                                                  {menuOptionItem?.Price && (
+                                                    <p>
+                                                      £{menuOptionItem?.Price}
+                                                    </p>
+                                                  )}
+                                                </div>
+                                              );
+                                            }
+                                          )
+                                      )
+                                    }
+                                  </section>
                                   <button className='modal-submit-btn flex justify-between cursor-pointer p-4 bg-[#1879D8] gap-4 rounded-4xl hover:ring-blue-500 hover:ring-1'>
                                     <img
                                       src='/src/assets/shopping-cart-white.png'
