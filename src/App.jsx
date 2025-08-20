@@ -35,14 +35,12 @@ function App() {
           src='/src/assets/flipdish-logo.svg'
           alt='Flipdish Logo'
           className='w-[135px] h-[40px] my-4'
-          loading='lazy'
         />
         <div>
           <img
             src='/src/assets/shopping-cart.png'
             alt='Shopping Cart'
             className='w-6 h-6 my-4'
-            loading='lazy'
           />
         </div>
       </header>
@@ -74,11 +72,18 @@ function App() {
                           key={menuItem?.MenuItemId}
                           className='flex flex-col gap-2 border rounded-xl bg-white border-gray-100 shadow-sm p-4'
                         >
-                          <img
-                            src='/src/assets/heart.png'
-                            alt='Heart Icon'
-                            className='heart-icon w-5 h-5 mb-2 mr-2 self-end transition-transform duration-200 hover:scale-120'
-                          />
+                          <button
+                            type='button'
+                            aria-label='Like button'
+                            className='flex self-end cursor-pointer'
+                          >
+                            <img
+                              src='/src/assets/like-icon.png'
+                              alt='Like Icon'
+                              className='like-icon w-5 h-5 mb-2 mr-2 transition-transform duration-200 hover:scale-120'
+                              loading='lazy'
+                            />
+                          </button>
                           {menuItem?.ImageUrl && (
                             <div className='shrink-0 lg:w-[450px] h-[250px] overflow-hidden rounded-2xl'>
                               <img
@@ -122,9 +127,38 @@ function App() {
                             >
                               Customize &gt;
                             </button>
-
-                            {isModalOpen ? (
-    
+                            {isModalOpen && (
+                              <div className='modal-container fixed inset-0 w-full h-full flex justify-center items-center bg-black/20'>
+                                <div className='modal bg-white w-[30rem] rounded-2xl p-6'>
+                                  <div className='flex justify-between'>
+                                    <h2 className='modal-header text-lg font-bold'>
+                                      CUSTOMIZE YOUR CHOICE
+                                    </h2>
+                                    <button
+                                      type='reset'
+                                      aria-label='Close button'
+                                      onClick={handleModalClose}
+                                      className='hover:bg-[#EEEDED] rounded-3xl p-2 cursor-pointer flex self-end'
+                                    >
+                                      <img
+                                        src='/src/assets/close-icon.png'
+                                        alt='Close Icon'
+                                        className='w-5 h-5'
+                                      />
+                                    </button>
+                                  </div>
+                                  <button className='modal-submit-btn flex justify-between cursor-pointer p-4 bg-[#1879D8] gap-4 rounded-4xl hover:ring-blue-500 hover:ring-1'>
+                                    <img
+                                      src='/src/assets/shopping-cart-white.png'
+                                      alt='Shopping Cart'
+                                      className='w-5 h-5'
+                                    />
+                                    <p className='text-[#1879D8] text-sm font-bold'>
+                                      ADD TO CART
+                                    </p>
+                                  </button>
+                                </div>
+                              </div>
                             )}
                           </div>
                         </section>

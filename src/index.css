@@ -21,14 +21,14 @@ h2 {
   font-style: normal;
 }
 
-.heart-icon {
-  display: flex;
-  justify-content: end;
-}
-
-.heart-icon:hover,
-.heart-icon:focus {
-  cursor: pointer;
+.modal-submit-btn {
+  background: #1879d8;
+  background: linear-gradient(
+    90deg,
+    rgba(24, 121, 216, 1) 30%,
+    rgba(242, 238, 237, 0.655) 11%,
+    rgb(236, 236, 236) 100%
+  );
 }
 
 @media (width <= 1200px) {
