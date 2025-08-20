@@ -6,6 +6,7 @@
   margin: 0 auto;
   padding: 0 90px;
   max-width: 1200px;
+  background-color: #f8f8f8;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -18,6 +19,16 @@ h2 {
   font-family: 'Libertinus Sans', sans-serif;
   font-weight: 700;
   font-style: normal;
+}
+
+.heart-icon {
+  display: flex;
+  justify-content: end;
+}
+
+.heart-icon:hover,
+.heart-icon:focus {
+  cursor: pointer;
 }
 
 @media (width <= 1200px) {

@@ -1,13 +1,20 @@
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function App() {
   const [menu, setMenu] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleModalOpen = () => setIsModalOpen(true);
+  const handleModalClose = () => setIsModalOpen(false);
 
   useEffect(() => {
     fetch(
       'https://menus.flipdish.co/prod/16798/e6220da2-c34a-4ea2-bb51-a3e190fc5f08.json'
     )
       .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
         return response.json();
       })
       .then(data => {
@@ -15,7 +22,9 @@ function App() {
         setMenu(data.MenuSections);
       })
       .catch(error => {
-        console.error(error);
+        console.error(
+          `'There was a problem with the fetch operation:' ${error}`
+        );
       });
   }, []);
 
@@ -26,55 +35,106 @@ function App() {
           src='/src/assets/flipdish-logo.svg'
           alt='Flipdish Logo'
           className='w-[135px] h-[40px] my-4'
+          loading='lazy'
         />
-        <img
-          src='/src/assets/shopping-cart.png'
-          alt='Shopping Cart'
-          className='w-6 h-6 my-4'
-        />
+        <div>
+          <img
+            src='/src/assets/shopping-cart.png'
+            alt='Shopping Cart'
+            className='w-6 h-6 my-4'
+            loading='lazy'
+          />
+        </div>
       </header>
       <h1 className='text-4xl font-bold text-center mt-6 text-[#0B75D7]'>
         MENU
       </h1>
       <main className='my-4 flex flex-col gap-6'>
-        {menu.map(menuSection => {
-          return (
-            <>
-              <h2 className='text-lg md:text-xl font-bold underline-offset-8 mt-9'>
-                {menuSection?.Name.toUpperCase()}
-                <hr class='w-full mx-auto border-gray-400 border-2 border-double rounded-sm'></hr>
-              </h2>
-              <section className='grid grid-cols-1 md:grid-cols-2 gap-12'>
-                {menuSection?.MenuItems.map(menuItem => {
-                  return (
-                    <>
-                      <section className='flex flex-col gap-2 border rounded-xl border-gray-100 shadow-sm p-4'>
-                        <div className='shrink-0 lg:w-[450px] h-[200px] overflow-hidden rounded-2xl'>
+        {menu
+          .filter(menuSection => !/test/i.test(menuSection.Name))
+          .map(menuSection => {
+            return (
+              <>
+                {menuSection?.Name && (
+                  <h2 className='text-lg md:text-xl font-bold underline-offset-8 mt-9'>
+                    {menuSection.Name.toUpperCase()}
+                    <hr className='w-full mx-auto border-gray-200 border-2 rounded-sm'></hr>
+                  </h2>
+                )}
+                <section
+                  key={menuSection?.MenuSectionId}
+                  className='grid grid-cols-1 md:grid-cols-2 gap-12'
+                >
+                  {menuSection?.MenuItems.filter(
+                    menuItem => !/test/i.test(menuItem.Name)
+                  ).map(menuItem => {
+                    return (
+                      <>
+                        <section
+                          key={menuItem?.MenuItemId}
+                          className='flex flex-col gap-2 border rounded-xl bg-white border-gray-100 shadow-sm p-4'
+                        >
                           <img
-                            src={menuItem?.ImageUrl}
-                            alt={menuItem?.Name}
-                            className='h-full w-full object-cover rounded-2xl transition-transform duration-400 hover:scale-120'
+                            src='/src/assets/heart.png'
+                            alt='Heart Icon'
+                            className='heart-icon w-5 h-5 mb-2 mr-2 self-end transition-transform duration-200 hover:scale-120'
                           />
-                        </div>
-                        <div>
-                          <h4 className='text-lg font-bold tracking-wide'>
-                            {menuItem?.Name}
-                          </h4>
-                          <p className='text-gray-500 line-clamp-3'>
-                            {menuItem?.Description}
-                          </p>
-                        </div>
-                        <p className='mt-auto text-end text-xl'>
-                          {menuItem?.Price}£
-                        </p>
-                      </section>
-                    </>
-                  );
-                })}
-              </section>
-            </>
-          );
-        })}
+                          {menuItem?.ImageUrl && (
+                            <div className='shrink-0 lg:w-[450px] h-[250px] overflow-hidden rounded-2xl'>
+                              <img
+                                src={menuItem.ImageUrl || 'Menu Item'}
+                                alt={menuItem?.Name}
+                                className='h-full w-full object-cover rounded-2xl transition-transform duration-400 hover:scale-110'
+                                loading='lazy'
+                              />
+                            </div>
+                          )}
+                          <div>
+                            {menuItem?.Name && (
+                              <h4 className='text-lg font-bold tracking-wide'>
+                                {menuItem.Name}
+                              </h4>
+                            )}
+                            {menuItem?.Description && (
+                              <p className='text-gray-500 line-clamp-3'>
+                                {menuItem.Description}
+                              </p>
+                            )}
+                          </div>
+                          <div className='flex justify-between mt-auto text-start'>
+                            {menuItem?.Price > 0 ? (
+                              <p className='text-xl font-medium'>
+                                £{menuItem?.Price.toFixed(2)}
+                              </p>
+                            ) : (
+                              menuItem.MenuItemOptionSets.map(options => (
+                                <p
+                                  key={options.MenuItemOptionSetId}
+                                  className='text-xl font-medium'
+                                >
+                                  from £{options?.MinPrice.toFixed(2)}
+                                </p>
+                              ))
+                            )}
+                            <button
+                              onClick={handleModalOpen}
+                              className='pointer text-white rounded-3xl bg-[#1879D8] hover:bg-[#2574bd] px-4 py-2 cursor-pointer'
+                            >
+                              Customize &gt;
+                            </button>
+
+                            {isModalOpen ? (
+    
+                            )}
+                          </div>
+                        </section>
+                      </>
+                    );
+                  })}
+                </section>
+              </>
+            );
+          })}
       </main>
     </>
   );
