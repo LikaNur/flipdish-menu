@@ -2,6 +2,11 @@
 
 This is a simple menu built with JavaScript, React, and tested with Jest and Playwright.
 
+<div>
+    <img width="200" height="374" alt="representation" src="src/assets/mobile.png" />
+    <img width="400" height="374" alt="representation" src="src/assets/desktop.png" />
+</div>
+
 ---
 
 ## 🚀 Features
