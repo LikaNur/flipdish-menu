@@ -1,32 +1,32 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { displayPrice } from './displayPrice';
+import { Modal } from './Modal';
+import { enqueueSnackbar } from 'notistack';
 
 function App() {
   const [menu, setMenu] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  let modalRef = useRef();
+  const [selected, setSelectedItem] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
 
-  const handleModalOpen = () => setIsModalOpen(true);
-  const handleModalClose = () => setIsModalOpen(false);
+  function addToCart(selected) {
+    enqueueSnackbar(`Added ${selected.Name} to the cart!`, {
+      variant: 'success',
+    });
+    setCartCount(cartCount + 1);
 
-  function handleClickOutsideModal(e) {
-    if (
-      isModalOpen &&
-      modalRef.current &&
-      !modalRef.current.contains(e.target)
-    ) {
-      handleModalClose();
+    {
+      selected && setSelectedItem(null);
     }
   }
 
-  useEffect(() => {
-    if (!isModalOpen) return;
-
-    document.addEventListener('pointerdown', handleClickOutsideModal);
-
-    return () =>
-      document.removeEventListener('pointerdown', handleClickOutsideModal);
-  }, [isModalOpen]);
+  const handleModalOpen = menuItem => {
+    if (!selected) {
+      setSelectedItem(menuItem);
+    }
+  };
+  const handleModalClose = () => {
+    setSelectedItem(null);
+  };
 
   useEffect(() => {
     fetch(
@@ -39,7 +39,6 @@ function App() {
         return response.json();
       })
       .then(data => {
-        console.log(data);
         setMenu(data.MenuSections);
       })
       .catch(error => {
@@ -51,20 +50,25 @@ function App() {
 
   return (
     <>
-      <header className='flex justify-between'>
-        <img
-          src='/src/assets/flipdish-logo.svg'
-          alt='Flipdish Logo'
-          draggable='false'
-          className='w-[135px] h-[40px] my-4'
-        />
-        <div>
+      <header className='flex justify-between mt-6'>
+        <a href='https://www.flipdish.com/gb' target='blank' aria-label='link'>
+          <img
+            src='/src/assets/flipdish-logo.svg'
+            alt='Flipdish Logo'
+            draggable='false'
+            className='w-[135px] h-[40px]'
+          />
+        </a>
+        <div className='flex relative'>
           <img
             src='/src/assets/shopping-cart.png'
             alt='Shopping Cart'
             draggable='false'
-            className='w-6 h-6 my-4'
+            className='w-6 h-6'
           />
+          <p className='rounded-4xl bg-[#E02500]/85 bottom-8 left-4 px-2 absolute flex text-sm text-white cursor-pointer'>
+            {cartCount}
+          </p>
         </div>
       </header>
       <h1 className='text-4xl font-bold text-center mt-6 text-[#0B75D7]'>
@@ -75,144 +79,93 @@ function App() {
           .filter(menuSection => !/test/i.test(menuSection.Name))
           .map(menuSection => {
             return (
-              <>
+              <div key={menuSection?.MenuSectionId}>
                 {menuSection?.Name && (
-                  <h2 className='text-lg md:text-xl font-bold underline-offset-8 mt-9'>
+                  <h2 className='text-lg md:text-xl font-bold underline-offset-8 my-9'>
                     {menuSection.Name.toUpperCase()}
                     <hr className='w-full mx-auto border-gray-200 border-2 rounded-sm'></hr>
                   </h2>
                 )}
-                <section
-                  key={menuSection?.MenuSectionId}
-                  className='grid grid-cols-1 md:grid-cols-2 gap-12'
-                >
+                <section className='grid grid-cols-1 md:grid-cols-2 gap-12'>
                   {menuSection?.MenuItems.filter(
                     menuItem => !/test/i.test(menuItem.Name)
                   ).map(menuItem => {
+                    const isDisabled = menuItem.MenuItemOptionSets.length === 0;
                     return (
-                      <>
-                        <section
-                          key={menuItem?.MenuItemId}
-                          className='flex flex-col gap-2 border rounded-xl bg-white border-gray-100 shadow-sm p-4'
+                      <section
+                        key={menuItem?.MenuItemId}
+                        className='flex flex-col gap-2 border rounded-xl bg-white border-gray-100 shadow-sm p-4'
+                      >
+                        <button
+                          type='button'
+                          aria-label='Like button'
+                          className='flex self-end cursor-pointer'
+                          onClick={() => addToCart(menuItem)}
                         >
-                          <button
-                            type='button'
-                            aria-label='Like button'
-                            className='flex self-end cursor-pointer'
-                          >
+                          <img
+                            src='/src/assets/like-icon.png'
+                            alt='Like Icon'
+                            draggable='false'
+                            className='like-icon w-5 h-5 mb-2 mr-2 transition-transform duration-200 hover:scale-120'
+                            loading='lazy'
+                          />
+                        </button>
+                        {menuItem?.ImageUrl && (
+                          <div className='shrink-0 lg:w-[450px] h-[250px] overflow-hidden rounded-2xl'>
                             <img
-                              src='/src/assets/like-icon.png'
-                              alt='Like Icon'
+                              src={menuItem.ImageUrl}
+                              alt={menuItem?.Name || 'Menu Item'}
                               draggable='false'
-                              className='like-icon w-5 h-5 mb-2 mr-2 transition-transform duration-200 hover:scale-120'
+                              className='h-full w-full object-cover rounded-2xl transition-transform duration-400 hover:scale-110'
                               loading='lazy'
                             />
-                          </button>
-                          {menuItem?.ImageUrl && (
-                            <div className='shrink-0 lg:w-[450px] h-[250px] overflow-hidden rounded-2xl'>
-                              <img
-                                src={menuItem.ImageUrl}
-                                alt={menuItem?.Name || 'Menu Item'}
-                                draggable='false'
-                                className='h-full w-full object-cover rounded-2xl transition-transform duration-400 hover:scale-110'
-                                loading='lazy'
-                              />
-                            </div>
+                          </div>
+                        )}
+                        <div>
+                          {menuItem?.Name && (
+                            <h4 className='text-lg font-bold tracking-wide'>
+                              {menuItem.Name}
+                            </h4>
                           )}
-                          <div>
-                            {menuItem?.Name && (
-                              <h4 className='text-lg font-bold tracking-wide'>
-                                {menuItem.Name}
-                              </h4>
-                            )}
-                            {menuItem?.Description && (
-                              <p className='text-gray-500 line-clamp-3'>
-                                {menuItem.Description}
-                              </p>
-                            )}
-                          </div>
-                          <div className='flex justify-between mt-auto text-start'>
-                            <p className='text-xl font-medium text-[#b43d15]'>
-                              {displayPrice(menuItem)}
+                          {menuItem?.Description && (
+                            <p className='text-gray-500 line-clamp-3'>
+                              {menuItem.Description}
                             </p>
-                            <button
-                              key={menuItem?.MenuItemId}
-                              onClick={handleModalOpen}
-                              className='pointer text-white rounded-3xl bg-[#1879D8] hover:bg-[#2574bd] px-4 py-2 cursor-pointer'
-                            >
-                              Customize &gt;
-                            </button>
-
-                            {isModalOpen && (
-                              <div className='modal-container fixed inset-0 w-full h-full flex justify-center items-center px-4  bg-black/20'>
-                                <div
-                                  ref={modalRef}
-                                  className='modal bg-white w-[30rem] rounded-2xl p-6'
-                                >
-                                  <div className='flex justify-between'>
-                                    <h2 className='modal-header text-lg font-bold'>
-                                      CUSTOMIZE YOUR CHOICE
-                                    </h2>
-                                    <button
-                                      type='reset'
-                                      aria-label='Close button'
-                                      onClick={handleModalClose}
-                                      className='hover:bg-[#EEEDED] rounded-3xl p-2 cursor-pointer flex self-end'
-                                    >
-                                      <img
-                                        src='/src/assets/close-icon.png'
-                                        alt='Close Icon'
-                                        draggable='false'
-                                        className='w-5 h-5'
-                                      />
-                                    </button>
-                                  </div>
-
-                                  <section className='modal-content'>
-                                    {menuItem =>
-                                      menuItem.MenuItemOptionSets.map(
-                                        menuOption =>
-                                          menuOption.MenuItemOptionSetItems.map(
-                                            menuOptionItem => {
-                                              return (
-                                                <div>
-                                                  <p>{menuOptionItem?.Name}</p>
-                                                  {menuOptionItem?.Price && (
-                                                    <p>
-                                                      £{menuOptionItem?.Price}
-                                                    </p>
-                                                  )}
-                                                </div>
-                                              );
-                                            }
-                                          )
-                                      )
-                                    }
-                                  </section>
-                                  <button className='modal-submit-btn flex justify-between cursor-pointer p-4 bg-[#1879D8] gap-4 rounded-4xl hover:ring-blue-500 hover:ring-1'>
-                                    <img
-                                      src='/src/assets/shopping-cart-white.png'
-                                      alt='Shopping Cart'
-                                      draggable='false'
-                                      className='w-5 h-5'
-                                    />
-                                    <p className='text-[#1879D8] text-sm font-bold'>
-                                      ADD TO CART
-                                    </p>
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </section>
-                      </>
+                          )}
+                        </div>
+                        <div className='flex justify-between mt-auto items-center text-start'>
+                          <p className='text-xl font-bold'>
+                            {displayPrice(menuItem)}
+                          </p>
+                          <button
+                            key={menuItem?.MenuItemId}
+                            onClick={() => handleModalOpen(menuItem)}
+                            className={`pointer text-white rounded-3xl px-4 py-2 ${
+                              isDisabled
+                                ? 'bg-[#9cc5ee]  cursor-not-allowed'
+                                : 'bg-[#1879D8] hover:bg-[#2574bd] cursor-pointer'
+                            } `}
+                            disabled={isDisabled}
+                          >
+                            Customize &gt;
+                          </button>
+                        </div>
+                      </section>
                     );
                   })}
                 </section>
-              </>
+              </div>
             );
           })}
       </main>
+
+      {selected && (
+        <Modal
+          item={selected}
+          onClose={handleModalClose}
+          onAddToCart={addToCart}
+        />
+      )}
     </>
   );
 }
