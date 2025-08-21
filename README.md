@@ -4,8 +4,9 @@ This is a simple menu built with JavaScript, React, and tested with Jest and Pla
 
 <div>
     <img width="200" height="374" alt="mobile" src="src/assets/mobile.png" />
-    <br>
+      &nbsp;&nbsp;&nbsp;
     <img width="300" height="374" alt="desktop" src="src/assets/desktop.png" />
+
 </div>
 
 ---
